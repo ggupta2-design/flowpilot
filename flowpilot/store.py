@@ -11,8 +11,16 @@ class TaskStore:
     def load(self) -> list[Task]:
         if not self.path.exists():
             return []
-        content = json.loads(self.path.read_text(encoding="utf-8"))
-        return [Task.from_dict(item) for item in content]
+        try:
+            content = json.loads(self.path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as error:
+            raise ValueError(f"Task store contains invalid JSON: {self.path}") from error
+        if not isinstance(content, list):
+            raise ValueError(f"Task store must contain a JSON list: {self.path}")
+        try:
+            return [Task.from_dict(item) for item in content]
+        except (TypeError, ValueError) as error:
+            raise ValueError(f"Task store contains an invalid task: {self.path}") from error
 
     def save(self, tasks: list[Task]) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
