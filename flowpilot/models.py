@@ -1,4 +1,4 @@
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from datetime import date, datetime
 from uuid import uuid4
 
@@ -8,6 +8,7 @@ class Task:
     title: str
     priority: str = "medium"
     due_date: str | None = None
+    tags: list[str] = field(default_factory=list)
     id: str = ""
     completed: bool = False
     created_at: str = ""
@@ -20,6 +21,11 @@ class Task:
             raise ValueError("Priority must be low, medium, or high")
         if self.due_date:
             date.fromisoformat(self.due_date)
+        self.tags = sorted({
+            tag.strip().lower()
+            for tag in self.tags
+            if tag and tag.strip()
+        })
         if not self.id:
             self.id = uuid4().hex[:8]
         if not self.created_at:
