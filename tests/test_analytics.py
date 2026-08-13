@@ -10,6 +10,7 @@ def test_completion_stats() -> None:
         Task("Done", completed=True),
         Task("Late", due_date=yesterday),
         Task("Open"),
+        Task("Archived", archived=True, due_date=yesterday),
     ]
     assert completion_stats(tasks) == {
         "total": 3,
@@ -17,8 +18,16 @@ def test_completion_stats() -> None:
         "done": 1,
         "rate": 33,
         "overdue": 1,
+        "archived": 1,
     }
 
 
 def test_empty_stats() -> None:
-    assert completion_stats([])["rate"] == 0
+    assert completion_stats([]) == {
+        "total": 0,
+        "open": 0,
+        "done": 0,
+        "rate": 0,
+        "overdue": 0,
+        "archived": 0,
+    }
