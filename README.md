@@ -8,50 +8,57 @@ Recurring responsibilities are easy to lose across notes, calendars, and spreads
 
 ## Features
 
-- Create tasks with priorities, due dates, and normalized tags
-- Detect overdue work and track completion metrics
+- Create and edit tasks with priorities, due dates, and normalized tags
+- Complete and reopen work without losing its history
+- Archive and restore tasks instead of deleting them
+- Detect overdue work and track active and archived metrics
 - Search, filter, and sort tasks by status, priority, tag, creation time, or deadline
-- Generate the next daily, weekly, or monthly occurrence of a task
+- Generate the next daily, weekly, or monthly occurrence
 - Import and export task data through CSV
-- Produce machine-readable JSON output
-- Store data safely using atomic local writes with clear corruption errors
+- Create and restore versioned JSON backups
+- Recover the previous local store after an accidental overwrite
+- Store data safely using atomic writes and automatic recovery snapshots
 
 ## Quick start
 
 ```bash
 python -m pip install -e ".[dev]"
 
-flowpilot add "Send weekly report" --priority high --due 2030-01-01 --tag work --tag weekly
-flowpilot list --status open --tag work --sort due
+flowpilot add "Send weekly report" --priority high --due 2030-01-01 --tag work
+flowpilot edit TASK_ID --title "Send Friday report" --priority medium
+flowpilot complete TASK_ID
+flowpilot reopen TASK_ID
+flowpilot archive TASK_ID
+flowpilot list --archived
+flowpilot restore TASK_ID
 flowpilot stats
-flowpilot export reports/tasks.csv
-flowpilot import reports/tasks.csv
 pytest
 ```
 
-To create the next occurrence of a dated task:
+## Recurrence and portability
 
 ```bash
 flowpilot repeat TASK_ID weekly
-```
-
-You can also run the package directly:
-
-```bash
-python -m flowpilot list
+flowpilot export reports/tasks.csv
+flowpilot import reports/tasks.csv
+flowpilot backup backups/flowpilot.json
+flowpilot restore-backup backups/flowpilot.json
+flowpilot recover
 ```
 
 ## Commands
 
 | Command | Purpose |
 |---|---|
-| `add` | Create a prioritized, tagged task with an optional due date |
+| `add` / `edit` | Create or revise a task |
 | `list` | Search, filter, sort, or return JSON |
-| `complete` | Mark a task finished |
-| `delete` | Remove a task |
+| `complete` / `reopen` | Reversibly change completion state |
+| `archive` / `restore` | Hide or restore inactive tasks |
+| `delete` | Permanently remove a task |
 | `repeat` | Create the next daily, weekly, or monthly occurrence |
-| `stats` | Summarize completion and overdue progress |
-| `export` | Write tasks to a portable CSV file |
-| `import` | Safely merge tasks from a CSV file |
+| `stats` | Summarize active, overdue, and archived work |
+| `export` / `import` | Transfer tasks through CSV |
+| `backup` / `restore-backup` | Transfer versioned JSON backups |
+| `recover` | Restore the previous automatic local snapshot |
 
-Task data is stored at `~/.flowpilot/tasks.json`. See [SECURITY.md](SECURITY.md) before handling sensitive task information.
+Task data is stored at `~/.flowpilot/tasks.json`; the previous version is retained at `tasks.json.bak`. See [SECURITY.md](SECURITY.md) before handling sensitive information.
