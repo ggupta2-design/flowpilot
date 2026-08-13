@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0
+
+- Added validated task editing with lifecycle update timestamps.
+- Added reversible completion, reopening, archiving, and restoration.
+- Added active and archived task views and analytics.
+- Added versioned, atomic JSON backup and merge-safe restore operations.
+- Added automatic recovery snapshots before local-store overwrites.
+- Preserved lifecycle metadata in CSV transfers.
+- Added regression coverage for operations, backups, snapshots, and archived metrics.
+
 ## 0.2.0
 
 - Added normalized, deduplicated task tags.
