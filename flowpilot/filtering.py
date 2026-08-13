@@ -8,13 +8,14 @@ def filter_tasks(
     search: str | None = None,
     priority: str | None = None,
     tag: str | None = None,
+    archived: bool = False,
 ) -> list[Task]:
     if status not in {"all", "open", "done"}:
         raise ValueError("Status must be all, open, or done")
     if priority and priority not in {"low", "medium", "high"}:
         raise ValueError("Priority must be low, medium, or high")
 
-    result = list(tasks)
+    result = [task for task in tasks if task.archived is archived]
     if status == "open":
         result = [task for task in result if not task.completed]
     elif status == "done":
