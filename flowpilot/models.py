@@ -3,6 +3,10 @@ from datetime import date, datetime
 from uuid import uuid4
 
 
+def _timestamp() -> str:
+    return datetime.now().astimezone().isoformat(timespec="seconds")
+
+
 @dataclass(slots=True)
 class Task:
     title: str
@@ -11,7 +15,10 @@ class Task:
     tags: list[str] = field(default_factory=list)
     id: str = ""
     completed: bool = False
+    archived: bool = False
     created_at: str = ""
+    completed_at: str | None = None
+    updated_at: str = ""
 
     def __post_init__(self) -> None:
         self.title = self.title.strip()
@@ -29,15 +36,21 @@ class Task:
         if not self.id:
             self.id = uuid4().hex[:8]
         if not self.created_at:
-            self.created_at = datetime.now().astimezone().isoformat(timespec="seconds")
+            self.created_at = _timestamp()
+        if not self.updated_at:
+            self.updated_at = self.created_at
 
     @property
     def overdue(self) -> bool:
         return bool(
             self.due_date
             and not self.completed
+            and not self.archived
             and date.fromisoformat(self.due_date) < date.today()
         )
+
+    def touch(self) -> None:
+        self.updated_at = _timestamp()
 
     def to_dict(self) -> dict:
         return asdict(self)
