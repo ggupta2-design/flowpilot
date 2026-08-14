@@ -39,3 +39,20 @@ def test_edit_can_clear_due_date() -> None:
     task = Task("Report", due_date="2030-02-01")
     edit_task(task, clear_due_date=True)
     assert task.due_date is None
+
+
+def test_edit_updates_planning_metadata() -> None:
+    task = Task("Report")
+    edit_task(
+        task,
+        estimated_minutes=75,
+        remind_at="2030-02-01T09:00:00-05:00",
+    )
+    assert task.estimated_minutes == 75
+    assert task.remind_at == "2030-02-01T09:00:00-05:00"
+
+
+def test_edit_can_clear_reminder() -> None:
+    task = Task("Report", remind_at="2030-02-01T09:00:00-05:00")
+    edit_task(task, clear_reminder=True)
+    assert task.remind_at is None
