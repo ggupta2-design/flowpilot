@@ -37,6 +37,9 @@ def edit_task(
     due_date: str | None = None,
     clear_due_date: bool = False,
     tags: list[str] | None = None,
+    estimated_minutes: int | None = None,
+    remind_at: str | None = None,
+    clear_reminder: bool = False,
 ) -> None:
     candidate = Task(
         id=task.id,
@@ -44,6 +47,8 @@ def edit_task(
         priority=priority if priority is not None else task.priority,
         due_date=None if clear_due_date else (due_date if due_date is not None else task.due_date),
         tags=tags if tags is not None else task.tags,
+        estimated_minutes=estimated_minutes if estimated_minutes is not None else task.estimated_minutes,
+        remind_at=None if clear_reminder else (remind_at if remind_at is not None else task.remind_at),
         completed=task.completed,
         archived=task.archived,
         created_at=task.created_at,
@@ -54,4 +59,6 @@ def edit_task(
     task.priority = candidate.priority
     task.due_date = candidate.due_date
     task.tags = candidate.tags
+    task.estimated_minutes = candidate.estimated_minutes
+    task.remind_at = candidate.remind_at
     task.touch()
