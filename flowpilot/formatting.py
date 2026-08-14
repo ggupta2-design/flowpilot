@@ -9,7 +9,12 @@ def format_task(task: Task) -> str:
     archived = " ARCHIVED" if task.archived else ""
     due = f" due:{task.due_date}" if task.due_date else ""
     tags = f" tags:{','.join(task.tags)}" if task.tags else ""
-    return f"[{marker}] {task.id}  {task.priority.upper():6}  {task.title}{due}{tags}{alert}{archived}"
+    reminder = f" remind:{task.remind_at}" if task.remind_at else ""
+    effort = f" estimate:{task.estimated_minutes}m"
+    return (
+        f"[{marker}] {task.id}  {task.priority.upper():6}  {task.title}"
+        f"{due}{tags}{effort}{reminder}{alert}{archived}"
+    )
 
 
 def format_json(tasks: list[Task]) -> str:
