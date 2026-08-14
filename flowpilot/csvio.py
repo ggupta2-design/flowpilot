@@ -10,6 +10,8 @@ FIELDS = [
     "priority",
     "due_date",
     "tags",
+    "estimated_minutes",
+    "remind_at",
     "completed",
     "archived",
     "created_at",
@@ -18,7 +20,7 @@ FIELDS = [
 ]
 
 
-def _serialize(task: Task) -> dict[str, str | bool | None]:
+def _serialize(task: Task) -> dict[str, str | int | bool | None]:
     value = task.to_dict()
     value["tags"] = ",".join(task.tags)
     return value
@@ -46,6 +48,7 @@ def import_tasks(path: Path) -> list[Task]:
 
         tasks: list[Task] = []
         for row in reader:
+            estimate = row.get("estimated_minutes", "").strip()
             tasks.append(
                 Task(
                     id=row.get("id", "").strip(),
@@ -53,6 +56,8 @@ def import_tasks(path: Path) -> list[Task]:
                     priority=row.get("priority", "").strip() or "medium",
                     due_date=row.get("due_date", "").strip() or None,
                     tags=row.get("tags", "").split(","),
+                    estimated_minutes=int(estimate) if estimate else 30,
+                    remind_at=row.get("remind_at", "").strip() or None,
                     completed=_truthy(row.get("completed")),
                     archived=_truthy(row.get("archived")),
                     created_at=row.get("created_at", "").strip(),
