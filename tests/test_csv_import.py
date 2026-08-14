@@ -6,9 +6,16 @@ from flowpilot.csvio import export_tasks, import_tasks
 from flowpilot.models import Task
 
 
-def test_csv_round_trip_preserves_tags(tmp_path: Path) -> None:
+def test_csv_round_trip_preserves_planning_metadata(tmp_path: Path) -> None:
     path = tmp_path / "tasks.csv"
-    original = Task("Report", priority="high", tags=["Work", "weekly"], completed=True)
+    original = Task(
+        "Report",
+        priority="high",
+        tags=["Work", "weekly"],
+        completed=True,
+        estimated_minutes=75,
+        remind_at="2030-01-01T09:00:00-05:00",
+    )
     export_tasks([original], path)
     assert import_tasks(path) == [original]
 
