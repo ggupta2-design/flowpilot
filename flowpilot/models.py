@@ -13,6 +13,8 @@ class Task:
     priority: str = "medium"
     due_date: str | None = None
     tags: list[str] = field(default_factory=list)
+    estimated_minutes: int = 30
+    remind_at: str | None = None
     id: str = ""
     completed: bool = False
     archived: bool = False
@@ -28,6 +30,12 @@ class Task:
             raise ValueError("Priority must be low, medium, or high")
         if self.due_date:
             date.fromisoformat(self.due_date)
+        if not isinstance(self.estimated_minutes, int) or self.estimated_minutes <= 0:
+            raise ValueError("Estimated minutes must be a positive integer")
+        if self.remind_at:
+            reminder = datetime.fromisoformat(self.remind_at)
+            if reminder.utcoffset() is None:
+                raise ValueError("Reminder timestamp must include a timezone")
         self.tags = sorted({
             tag.strip().lower()
             for tag in self.tags
