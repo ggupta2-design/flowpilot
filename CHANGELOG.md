@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.0
+
+- Added validated effort estimates and timezone-aware reminder timestamps.
+- Added a capacity-aware daily agenda ordered by deadlines and priority.
+- Added local reminder readiness queries with text and JSON output.
+- Added remaining-work minutes to progress analytics.
+- Preserved planning metadata across edits, recurrence, CSV transfers, and backups.
+- Added regression coverage for planning, reminders, validation, editing, and analytics.
+
 ## 0.3.0
 
 - Added validated task editing with lifecycle update timestamps.
