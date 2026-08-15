@@ -7,6 +7,12 @@ def _timestamp() -> str:
     return datetime.now().astimezone().isoformat(timespec="seconds")
 
 
+def _validate_aware_timestamp(value: str, *, field_name: str) -> None:
+    parsed = datetime.fromisoformat(value)
+    if parsed.utcoffset() is None:
+        raise ValueError(`${field_name} timestamp must include a timezone`)
+
+
 @dataclass(slots=True)
 class Task:
     title: str
@@ -15,6 +21,7 @@ class Task:
     tags: list[str] = field(default_factory=list)
     estimated_minutes: int = 30
     remind_at: str | None = None
+    snoozed_until: str | None = None
     id: str = ""
     completed: bool = False
     archived: bool = False
@@ -33,9 +40,11 @@ class Task:
         if not isinstance(self.estimated_minutes, int) or self.estimated_minutes <= 0:
             raise ValueError("Estimated minutes must be a positive integer")
         if self.remind_at:
-            reminder = datetime.fromisoformat(self.remind_at)
-            if reminder.utcoffset() is None:
-                raise ValueError("Reminder timestamp must include a timezone")
+            _validate_aware_timestamp(self.remind_at, field_name="Reminder")
+        if self.snoozed_until:
+            _validate_aware_timestamp(self.snoozed_until, field_name="Snooze")
+            if not self.remind_at:
+                raise ValueError("A snooze requires a reminder")
         self.tags = sorted({
             tag.strip().lower()
             for tag in self.tags
