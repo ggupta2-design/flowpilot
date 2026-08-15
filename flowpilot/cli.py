@@ -11,7 +11,8 @@ from .models import Task
 from .operations import archive_task, complete_task, edit_task, reopen_task, restore_task
 from .planner import build_daily_plan, planned_minutes
 from .recurrence import FREQUENCIES, next_due_date
-from .reminders import reminders_ready
+from .reminders import clear_snooze, reminders_ready, snooze_task
+from .rules import apply_rules, load_rules
 from .sorting import sort_tasks
 from .store import TaskStore
 
@@ -37,9 +38,13 @@ def build_parser() -> argparse.ArgumentParser:
     listing.add_argument("--sort", choices=["created", "priority", "due"], default="created")
     listing.add_argument("--json", action="store_true", dest="as_json")
 
-    for name in ("complete", "reopen", "archive", "restore", "delete"):
+    for name in ("complete", "reopen", "archive", "restore", "delete", "unsnooze"):
         command = commands.add_parser(name, help=f"{name.title()} a task")
         command.add_argument("task_id")
+
+    snooze = commands.add_parser("snooze", help="Defer a task reminder")
+    snooze.add_argument("task_id")
+    snooze.add_argument("until")
 
     edit = commands.add_parser("edit", help="Edit task fields")
     edit.add_argument("task_id")
@@ -63,6 +68,10 @@ def build_parser() -> argparse.ArgumentParser:
     reminders = commands.add_parser("reminders", help="Show reminders ready now")
     reminders.add_argument("--at", dest="current_time")
     reminders.add_argument("--json", action="store_true", dest="as_json")
+
+    rules = commands.add_parser("apply-rules", help="Apply safe automation rules from JSON")
+    rules.add_argument("path", type=Path)
+    rules.add_argument("--at", dest="current_time")
 
     commands.add_parser("stats", help="Show progress summary")
     for name in ("export", "import", "backup", "restore-backup"):
@@ -104,7 +113,17 @@ def main(argv: list[str] | None = None) -> int:
         )
         visible = sort_tasks(visible, args.sort)
         print(format_json(visible) if args.as_json else "\n".join(map(format_task, visible)) or "No tasks.")
-    elif args.command in {"complete", "reopen", "archive", "restore", "delete", "edit", "repeat"}:
+    elif args.command in {
+        "complete",
+        "reopen",
+        "archive",
+        "restore",
+        "delete",
+        "edit",
+        "repeat",
+        "snooze",
+        "unsnooze",
+    }:
         task = _find_task(tasks, args.task_id)
         if task is None:
             print(f"Task not found: {args.task_id}")
@@ -119,6 +138,10 @@ def main(argv: list[str] | None = None) -> int:
             restore_task(task)
         elif args.command == "delete":
             tasks.remove(task)
+        elif args.command == "snooze":
+            snooze_task(task, args.until)
+        elif args.command == "unsnooze":
+            clear_snooze(task)
         elif args.command == "edit":
             edit_task(
                 task,
@@ -153,6 +176,12 @@ def main(argv: list[str] | None = None) -> int:
         current = datetime.fromisoformat(args.current_time) if args.current_time else None
         ready = reminders_ready(tasks, now=current)
         print(format_json(ready) if args.as_json else "\n".join(map(format_task, ready)) or "No reminders.")
+    elif args.command == "apply-rules":
+        current = datetime.fromisoformat(args.current_time) if args.current_time else None
+        applied = apply_rules(tasks, load_rules(args.path), now=current)
+        if applied:
+            store.save(tasks)
+        print(f"Applied {len(applied)} rule changes")
     elif args.command == "stats":
         stats = completion_stats(tasks)
         print(" | ".join(f"{key.title()}: {value}" for key, value in stats.items()))
