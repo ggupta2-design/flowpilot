@@ -10,7 +10,7 @@ def _timestamp() -> str:
 def _validate_aware_timestamp(value: str, *, field_name: str) -> None:
     parsed = datetime.fromisoformat(value)
     if parsed.utcoffset() is None:
-        raise ValueError(`${field_name} timestamp must include a timezone`)
+        raise ValueError(f"{field_name} timestamp must include a timezone")
 
 
 @dataclass(slots=True)
