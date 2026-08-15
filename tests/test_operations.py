@@ -52,7 +52,25 @@ def test_edit_updates_planning_metadata() -> None:
     assert task.remind_at == "2030-02-01T09:00:00-05:00"
 
 
-def test_edit_can_clear_reminder() -> None:
-    task = Task("Report", remind_at="2030-02-01T09:00:00-05:00")
+def test_edit_can_clear_reminder_and_snooze() -> None:
+    task = Task(
+        "Report",
+        remind_at="2030-02-01T09:00:00-05:00",
+        snoozed_until="2030-02-01T11:00:00-05:00",
+    )
     edit_task(task, clear_reminder=True)
     assert task.remind_at is None
+    assert task.snoozed_until is None
+
+
+def test_replacing_reminder_discards_stale_snooze() -> None:
+    task = Task(
+        "Report",
+        remind_at="2030-02-01T09:00:00-05:00",
+        snoozed_until="2030-02-01T11:00:00-05:00",
+    )
+
+    edit_task(task, remind_at="2030-02-02T09:00:00-05:00")
+
+    assert task.remind_at == "2030-02-02T09:00:00-05:00"
+    assert task.snoozed_until is None
