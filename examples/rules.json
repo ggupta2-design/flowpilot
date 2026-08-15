@@ -1,0 +1,18 @@
+[
+  {
+    "name": "prepare client reports",
+    "match_tag": "client",
+    "title_contains": "report",
+    "set_priority": "high",
+    "add_tags": ["review"],
+    "due_in_days": 2,
+    "remind_in_hours": 24
+  },
+  {
+    "name": "surface urgent work",
+    "match_tag": "urgent",
+    "add_tags": ["focus"],
+    "due_in_days": 0,
+    "remind_in_hours": 1
+  }
+]
