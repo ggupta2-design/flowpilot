@@ -41,6 +41,8 @@ def edit_task(
     remind_at: str | None = None,
     clear_reminder: bool = False,
 ) -> None:
+    next_reminder = None if clear_reminder else (remind_at if remind_at is not None else task.remind_at)
+    keep_snooze = remind_at is None and not clear_reminder
     candidate = Task(
         id=task.id,
         title=title if title is not None else task.title,
@@ -48,7 +50,8 @@ def edit_task(
         due_date=None if clear_due_date else (due_date if due_date is not None else task.due_date),
         tags=tags if tags is not None else task.tags,
         estimated_minutes=estimated_minutes if estimated_minutes is not None else task.estimated_minutes,
-        remind_at=None if clear_reminder else (remind_at if remind_at is not None else task.remind_at),
+        remind_at=next_reminder,
+        snoozed_until=task.snoozed_until if keep_snooze else None,
         completed=task.completed,
         archived=task.archived,
         created_at=task.created_at,
@@ -61,4 +64,5 @@ def edit_task(
     task.tags = candidate.tags
     task.estimated_minutes = candidate.estimated_minutes
     task.remind_at = candidate.remind_at
+    task.snoozed_until = candidate.snoozed_until
     task.touch()
