@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0
+
+- Added a validated JSON rule engine for deterministic task automation.
+- Added matching by priority, tag, and title text.
+- Added rule actions for priority, tags, relative due dates, and reminders.
+- Added timezone-safe reminder snoozing and unsnoozing.
+- Preserved snooze state through edits, CSV transfers, backups, and JSON output.
+- Added scheduled and ready reminder metrics.
+- Added CLI commands, examples, and regression coverage for rules and snoozes.
+
 ## 0.4.0
 
 - Added validated effort estimates and timezone-aware reminder timestamps.
