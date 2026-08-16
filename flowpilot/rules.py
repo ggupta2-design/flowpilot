@@ -15,6 +15,8 @@ class Rule:
     match_priority: str | None = None
     match_tag: str | None = None
     title_contains: str | None = None
+    exclude_tag: str | None = None
+    exclude_title_contains: str | None = None
     set_priority: str | None = None
     add_tags: tuple[str, ...] = ()
     due_in_days: int | None = None
@@ -42,6 +44,13 @@ class Rule:
             return False
         if self.title_contains and self.title_contains.casefold() not in task.title.casefold():
             return False
+        if self.exclude_tag and self.exclude_tag.strip().lower() in task.tags:
+            return False
+        if (
+            self.exclude_title_contains
+            and self.exclude_title_contains.casefold() in task.title.casefold()
+        ):
+            return False
         return True
 
     @classmethod
@@ -51,6 +60,8 @@ class Rule:
             "match_priority",
             "match_tag",
             "title_contains",
+            "exclude_tag",
+            "exclude_title_contains",
             "set_priority",
             "add_tags",
             "due_in_days",
