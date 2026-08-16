@@ -127,3 +127,33 @@ def test_load_rules_accepts_exclusion_fields(tmp_path: Path) -> None:
 
     assert rule.exclude_tag == "internal"
     assert rule.exclude_title_contains == "draft"
+
+
+def test_rule_can_clear_due_date_and_reminder() -> None:
+    task = Task(
+        "Unscheduled work",
+        due_date="2030-02-01",
+        remind_at="2030-01-31T09:00:00+00:00",
+        snoozed_until="2030-01-31T11:00:00+00:00",
+    )
+    rule = Rule("remove schedule", clear_due_date=True, clear_reminder=True)
+
+    applied = apply_rules([task], [rule], now=NOW)
+
+    assert applied == [("remove schedule", task.id)]
+    assert task.due_date is None
+    assert task.remind_at is None
+    assert task.snoozed_until is None
+
+
+@pytest.mark.parametrize(
+    "rule",
+    [
+        Rule,
+    ],
+)
+def test_rule_rejects_conflicting_schedule_actions(rule: type[Rule]) -> None:
+    with pytest.raises(ValueError, match="clear and set a due date"):
+        rule("conflict", due_in_days=1, clear_due_date=True)
+    with pytest.raises(ValueError, match="clear and set a reminder"):
+        rule("conflict", remind_in_hours=1, clear_reminder=True)
