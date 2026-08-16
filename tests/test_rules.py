@@ -92,3 +92,38 @@ def test_load_rules_rejects_unsafe_or_invalid_shapes(tmp_path: Path, payload: ob
 
     with pytest.raises(ValueError):
         load_rules(path)
+
+
+def test_rule_exclusions_prevent_unwanted_matches() -> None:
+    tasks = [
+        Task("Send internal report", tags=["client", "internal"]),
+        Task("Send draft report", tags=["client"]),
+        Task("Send final report", tags=["client"]),
+    ]
+    rule = Rule(
+        "published client reports",
+        match_tag="client",
+        exclude_tag="internal",
+        exclude_title_contains="draft",
+        set_priority="high",
+    )
+
+    applied = apply_rules(tasks, [rule], now=NOW)
+
+    assert applied == [("published client reports", tasks[2].id)]
+    assert [task.priority for task in tasks] == ["medium", "medium", "high"]
+
+
+def test_load_rules_accepts_exclusion_fields(tmp_path: Path) -> None:
+    path = tmp_path / "rules.json"
+    path.write_text(json.dumps([{
+        "name": "external only",
+        "exclude_tag": "internal",
+        "exclude_title_contains": "draft",
+        "set_priority": "high",
+    }]), encoding="utf-8")
+
+    rule = load_rules(path)[0]
+
+    assert rule.exclude_tag == "internal"
+    assert rule.exclude_title_contains == "draft"
