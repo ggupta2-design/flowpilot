@@ -146,3 +146,14 @@ def apply_rules(
                 task.touch()
                 applied.append((rule.name, task.id))
     return applied
+
+
+def preview_rules(
+    tasks: list[Task],
+    rules: list[Rule],
+    *,
+    now: datetime | None = None,
+) -> list[tuple[str, str]]:
+    """Return planned rule applications without mutating task data."""
+    copies = [Task.from_dict(task.to_dict()) for task in tasks]
+    return apply_rules(copies, rules, now=now)
