@@ -10,7 +10,7 @@ Recurring responsibilities are easy to lose across notes, calendars, and spreads
 
 - Create and edit tasks with priorities, due dates, normalized tags, and effort estimates
 - Attach timezone-aware reminders, snooze alerts, and query reminders that are ready
-- Apply deterministic JSON automation rules without executing arbitrary code
+- Validate and preview deterministic JSON automation rules without executing arbitrary code
 - Build a deadline-aware daily agenda within a time budget
 - Complete, reopen, archive, and restore work without losing its history
 - Track overdue work, remaining effort, and scheduled or ready reminders
@@ -41,7 +41,7 @@ Reminder and snooze timestamps must include a UTC offset such as `Z`, `+00:00`, 
 
 ## Automation rules
 
-Rules are JSON objects with explicit matching and action fields. Supported matches are `match_priority`, `match_tag`, and `title_contains`. Supported actions are `set_priority`, `add_tags`, `due_in_days`, and `remind_in_hours`.
+Rules are JSON objects with explicit matching and action fields. Supported matches are `match_priority`, `match_tag`, and `title_contains`. Rules can avoid unwanted work with `exclude_tag` and `exclude_title_contains`. Supported actions are `set_priority`, `add_tags`, `due_in_days`, `remind_in_hours`, `clear_due_date`, and `clear_reminder`.
 
 ```json
 [
@@ -57,11 +57,15 @@ Rules are JSON objects with explicit matching and action fields. Supported match
 ]
 ```
 
-Preview the rule file, then apply it at the current time:
+Validate and preview a rule file before applying it:
 
 ```bash
+flowpilot validate-rules examples/rules.json
+flowpilot apply-rules examples/rules.json --dry-run
 flowpilot apply-rules examples/rules.json
 ```
+
+Use `--at` with an offset-aware timestamp when a repeatable preview is needed, for example `--at 2030-01-10T09:00:00+00:00`.
 
 Rules skip completed and archived tasks. Reapplying a rule records only real changes, and unknown fields are rejected.
 
@@ -85,7 +89,8 @@ flowpilot recover
 | `agenda` | Select deadline-aware tasks that fit a time budget |
 | `reminders` | Show ready reminders as text or JSON |
 | `snooze` / `unsnooze` | Defer or restore a reminder |
-| `apply-rules` | Apply validated task automation rules from JSON |
+| `validate-rules` | Check a rule file without reading or changing tasks |
+| `apply-rules` | Preview or apply validated task automation rules from JSON |
 | `complete` / `reopen` | Reversibly change completion state |
 | `archive` / `restore` | Hide or restore inactive tasks |
 | `delete` | Permanently remove a task |
