@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.6.0
+
+- Added non-mutating dry-run previews for automation rules.
+- Added a standalone command for validating rule files.
+- Added tag and title exclusion conditions to prevent unwanted matches.
+- Added safe actions for clearing task due dates and reminders.
+- Rejected conflicting set-and-clear schedule actions.
+- Expanded CLI tests, rule-engine coverage, examples, and documentation.
+
 ## 0.5.0
 
 - Added a validated JSON rule engine for deterministic task automation.
