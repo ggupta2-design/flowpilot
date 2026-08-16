@@ -16,3 +16,10 @@ def test_apply_rules_parser_supports_dry_run_and_fixed_time() -> None:
     assert args.path == Path("rules.json")
     assert args.dry_run
     assert args.current_time == "2030-01-10T09:00:00+00:00"
+
+
+def test_validate_rules_parser_accepts_a_rules_file() -> None:
+    args = build_parser().parse_args(["validate-rules", "automation.json"])
+
+    assert args.command == "validate-rules"
+    assert args.path == Path("automation.json")
