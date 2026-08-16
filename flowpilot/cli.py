@@ -12,7 +12,7 @@ from .operations import archive_task, complete_task, edit_task, reopen_task, res
 from .planner import build_daily_plan, planned_minutes
 from .recurrence import FREQUENCIES, next_due_date
 from .reminders import clear_snooze, reminders_ready, snooze_task
-from .rules import apply_rules, load_rules
+from .rules import apply_rules, load_rules, preview_rules
 from .sorting import sort_tasks
 from .store import TaskStore
 
@@ -72,6 +72,7 @@ def build_parser() -> argparse.ArgumentParser:
     rules = commands.add_parser("apply-rules", help="Apply safe automation rules from JSON")
     rules.add_argument("path", type=Path)
     rules.add_argument("--at", dest="current_time")
+    rules.add_argument("--dry-run", action="store_true")
 
     commands.add_parser("stats", help="Show progress summary")
     for name in ("export", "import", "backup", "restore-backup"):
@@ -178,10 +179,15 @@ def main(argv: list[str] | None = None) -> int:
         print(format_json(ready) if args.as_json else "\n".join(map(format_task, ready)) or "No reminders.")
     elif args.command == "apply-rules":
         current = datetime.fromisoformat(args.current_time) if args.current_time else None
-        applied = apply_rules(tasks, load_rules(args.path), now=current)
-        if applied:
-            store.save(tasks)
-        print(f"Applied {len(applied)} rule changes")
+        rules = load_rules(args.path)
+        if args.dry_run:
+            applied = preview_rules(tasks, rules, now=current)
+            print(f"Would apply {len(applied)} rule changes")
+        else:
+            applied = apply_rules(tasks, rules, now=current)
+            if applied:
+                store.save(tasks)
+            print(f"Applied {len(applied)} rule changes")
     elif args.command == "stats":
         stats = completion_stats(tasks)
         print(" | ".join(f"{key.title()}: {value}" for key, value in stats.items()))
