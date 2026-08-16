@@ -21,6 +21,8 @@ class Rule:
     add_tags: tuple[str, ...] = ()
     due_in_days: int | None = None
     remind_in_hours: int | None = None
+    clear_due_date: bool = False
+    clear_reminder: bool = False
 
     def __post_init__(self) -> None:
         if not self.name.strip():
@@ -34,6 +36,10 @@ class Rule:
         ):
             if value is not None and (not isinstance(value, int) or value < 0):
                 raise ValueError(f"{label} must be a non-negative integer")
+        if self.clear_due_date and self.due_in_days is not None:
+            raise ValueError("A rule cannot clear and set a due date")
+        if self.clear_reminder and self.remind_in_hours is not None:
+            raise ValueError("A rule cannot clear and set a reminder")
 
     def matches(self, task: Task) -> bool:
         if task.completed or task.archived:
@@ -66,6 +72,8 @@ class Rule:
             "add_tags",
             "due_in_days",
             "remind_in_hours",
+            "clear_due_date",
+            "clear_reminder",
         }
         unknown = set(value) - allowed
         if unknown:
@@ -116,12 +124,19 @@ def apply_rules(
             if normalized_tags != task.tags:
                 task.tags = normalized_tags
                 changed = True
-            if rule.due_in_days is not None:
+            if rule.clear_due_date and task.due_date is not None:
+                task.due_date = None
+                changed = True
+            elif rule.due_in_days is not None:
                 due_date = (current.date() + timedelta(days=rule.due_in_days)).isoformat()
                 if task.due_date != due_date:
                     task.due_date = due_date
                     changed = True
-            if rule.remind_in_hours is not None:
+            if rule.clear_reminder and task.remind_at is not None:
+                task.remind_at = None
+                task.snoozed_until = None
+                changed = True
+            elif rule.remind_in_hours is not None:
                 remind_at = (current + timedelta(hours=rule.remind_in_hours)).isoformat(timespec="seconds")
                 if task.remind_at != remind_at:
                     task.remind_at = remind_at
