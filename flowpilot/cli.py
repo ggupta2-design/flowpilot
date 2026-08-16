@@ -74,6 +74,9 @@ def build_parser() -> argparse.ArgumentParser:
     rules.add_argument("--at", dest="current_time")
     rules.add_argument("--dry-run", action="store_true")
 
+    validate_rules = commands.add_parser("validate-rules", help="Validate rules without task changes")
+    validate_rules.add_argument("path", type=Path)
+
     commands.add_parser("stats", help="Show progress summary")
     for name in ("export", "import", "backup", "restore-backup"):
         command = commands.add_parser(name)
@@ -188,6 +191,9 @@ def main(argv: list[str] | None = None) -> int:
             if applied:
                 store.save(tasks)
             print(f"Applied {len(applied)} rule changes")
+    elif args.command == "validate-rules":
+        rules = load_rules(args.path)
+        print(f"Validated {len(rules)} rules")
     elif args.command == "stats":
         stats = completion_stats(tasks)
         print(" | ".join(f"{key.title()}: {value}" for key, value in stats.items()))
