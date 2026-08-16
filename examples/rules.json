@@ -3,6 +3,8 @@
     "name": "prepare client reports",
     "match_tag": "client",
     "title_contains": "report",
+    "exclude_tag": "internal",
+    "exclude_title_contains": "draft",
     "set_priority": "high",
     "add_tags": ["review"],
     "due_in_days": 2,
@@ -14,5 +16,11 @@
     "add_tags": ["focus"],
     "due_in_days": 0,
     "remind_in_hours": 1
+  },
+  {
+    "name": "remove schedules from someday tasks",
+    "match_tag": "someday",
+    "clear_due_date": true,
+    "clear_reminder": true
   }
 ]
