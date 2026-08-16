@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from flowpilot.models import Task
-from flowpilot.rules import Rule, apply_rules, load_rules
+from flowpilot.rules import Rule, apply_rules, load_rules, preview_rules
 
 
 NOW = datetime(2030, 1, 10, 9, 0, tzinfo=timezone.utc)
@@ -157,3 +157,14 @@ def test_rule_rejects_conflicting_schedule_actions(rule: type[Rule]) -> None:
         rule("conflict", due_in_days=1, clear_due_date=True)
     with pytest.raises(ValueError, match="clear and set a reminder"):
         rule("conflict", remind_in_hours=1, clear_reminder=True)
+
+
+def test_preview_rules_reports_changes_without_mutating_tasks() -> None:
+    task = Task("Client report", tags=["client"])
+    before = task.to_dict()
+    rule = Rule("prioritize clients", match_tag="client", set_priority="high")
+
+    planned = preview_rules([task], [rule], now=NOW)
+
+    assert planned == [("prioritize clients", task.id)]
+    assert task.to_dict() == before
