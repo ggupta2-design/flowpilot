@@ -73,3 +73,18 @@ def audit_rules(
                 )
             )
     return changes
+
+
+def format_audit_text(changes: list[RuleChange]) -> str:
+    if not changes:
+        return "No rule changes."
+    lines: list[str] = []
+    for change in changes:
+        details = ", ".join(
+            f"{field}: {change.before[field]!r} -> {change.after[field]!r}"
+            for field in change.changed_fields
+        )
+        lines.append(
+            f"{change.rule_name} -> {change.task_id} ({change.task_title}): {details}"
+        )
+    return "\n".join(lines)
