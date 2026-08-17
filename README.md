@@ -10,7 +10,7 @@ Recurring responsibilities are easy to lose across notes, calendars, and spreads
 
 - Create and edit tasks with priorities, due dates, normalized tags, and effort estimates
 - Attach timezone-aware reminders, snooze alerts, and query reminders that are ready
-- Validate and preview deterministic JSON automation rules without executing arbitrary code
+- Validate, preview, and audit deterministic JSON automation rules without executing arbitrary code
 - Build a deadline-aware daily agenda within a time budget
 - Complete, reopen, archive, and restore work without losing its history
 - Track overdue work, remaining effort, and scheduled or ready reminders
@@ -61,13 +61,14 @@ Validate and preview a rule file before applying it:
 
 ```bash
 flowpilot validate-rules examples/rules.json
-flowpilot apply-rules examples/rules.json --dry-run
+flowpilot apply-rules examples/rules.json --dry-run --explain
+flowpilot apply-rules examples/rules.json --dry-run --explain --json
 flowpilot apply-rules examples/rules.json
 ```
 
 Use `--at` with an offset-aware timestamp when a repeatable preview is needed, for example `--at 2030-01-10T09:00:00+00:00`.
 
-Rules skip completed and archived tasks. Reapplying a rule records only real changes, and unknown fields are rejected.
+The `--explain` report names each matched rule and task, then shows the before-and-after values for every changed field. Add `--json` when another script will consume the audit. Rules skip completed and archived tasks. Rule names must be unique, every rule must contain an action, and unknown fields are rejected.
 
 ## Recurrence and portability
 
@@ -90,7 +91,7 @@ flowpilot recover
 | `reminders` | Show ready reminders as text or JSON |
 | `snooze` / `unsnooze` | Defer or restore a reminder |
 | `validate-rules` | Check a rule file without reading or changing tasks |
-| `apply-rules` | Preview or apply validated task automation rules from JSON |
+| `apply-rules` | Preview, audit, or apply validated task automation rules from JSON |
 | `complete` / `reopen` | Reversibly change completion state |
 | `archive` / `restore` | Hide or restore inactive tasks |
 | `delete` | Permanently remove a task |
