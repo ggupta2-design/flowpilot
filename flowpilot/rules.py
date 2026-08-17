@@ -40,6 +40,16 @@ class Rule:
             raise ValueError("A rule cannot clear and set a due date")
         if self.clear_reminder and self.remind_in_hours is not None:
             raise ValueError("A rule cannot clear and set a reminder")
+        has_action = bool(
+            self.set_priority
+            or self.add_tags
+            or self.due_in_days is not None
+            or self.remind_in_hours is not None
+            or self.clear_due_date
+            or self.clear_reminder
+        )
+        if not has_action:
+            raise ValueError("Every rule requires at least one action")
 
     def matches(self, task: Task) -> bool:
         if task.completed or task.archived:
