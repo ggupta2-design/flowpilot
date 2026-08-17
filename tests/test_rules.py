@@ -179,3 +179,8 @@ def test_load_rules_rejects_duplicate_names_case_insensitively(tmp_path: Path) -
 
     with pytest.raises(ValueError, match="unique"):
         load_rules(path)
+
+
+def test_rule_requires_at_least_one_action() -> None:
+    with pytest.raises(ValueError, match="at least one action"):
+        Rule("match only", match_tag="client")
