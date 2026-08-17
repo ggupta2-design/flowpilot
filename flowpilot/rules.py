@@ -95,7 +95,14 @@ def load_rules(path: Path) -> list[Rule]:
         raise ValueError("Rules file must contain a JSON list")
     if not all(isinstance(item, dict) for item in payload):
         raise ValueError("Every rule must be a JSON object")
-    return [Rule.from_dict(item) for item in payload]
+    rules = [Rule.from_dict(item) for item in payload]
+    normalized_names = [rule.name.strip().casefold() for rule in rules]
+    duplicates = sorted({
+        name for name in normalized_names if normalized_names.count(name) > 1
+    })
+    if duplicates:
+        raise ValueError(f"Rule names must be unique: {', '.join(duplicates)}")
+    return rules
 
 
 def apply_rules(
