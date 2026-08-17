@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.0
+
+- Added non-mutating, field-level audit reports for automation rules.
+- Added readable and JSON audit output for previews and real applications.
+- Preserved sequential rule effects in audit calculations.
+- Added duplicate rule-name detection for unambiguous reports.
+- Rejected rule definitions that contain no actions.
+- Added audit-focused tests and end-user documentation.
+
 ## 0.6.0
 
 - Added non-mutating dry-run previews for automation rules.
