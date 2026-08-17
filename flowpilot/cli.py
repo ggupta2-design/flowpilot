@@ -3,6 +3,7 @@ from datetime import date, datetime
 from pathlib import Path
 
 from .analytics import completion_stats
+from .audit import audit_rules, format_audit_text
 from .backup import create_backup, merge_backup, read_backup
 from .csvio import export_tasks, import_tasks
 from .filtering import filter_tasks
@@ -73,6 +74,7 @@ def build_parser() -> argparse.ArgumentParser:
     rules.add_argument("path", type=Path)
     rules.add_argument("--at", dest="current_time")
     rules.add_argument("--dry-run", action="store_true")
+    rules.add_argument("--explain", action="store_true")
 
     validate_rules = commands.add_parser("validate-rules", help="Validate rules without task changes")
     validate_rules.add_argument("path", type=Path)
@@ -183,6 +185,7 @@ def main(argv: list[str] | None = None) -> int:
     elif args.command == "apply-rules":
         current = datetime.fromisoformat(args.current_time) if args.current_time else None
         rules = load_rules(args.path)
+        audit = audit_rules(tasks, rules, now=current) if args.explain else []
         if args.dry_run:
             applied = preview_rules(tasks, rules, now=current)
             print(f"Would apply {len(applied)} rule changes")
@@ -191,6 +194,8 @@ def main(argv: list[str] | None = None) -> int:
             if applied:
                 store.save(tasks)
             print(f"Applied {len(applied)} rule changes")
+        if args.explain:
+            print(format_audit_text(audit))
     elif args.command == "validate-rules":
         rules = load_rules(args.path)
         print(f"Validated {len(rules)} rules")
