@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from flowpilot.audit import RuleChange, audit_rules
+from flowpilot.audit import RuleChange, audit_rules, format_audit_text
 from flowpilot.models import Task
 from flowpilot.rules import Rule
 
@@ -85,3 +85,23 @@ def test_rule_change_serializes_only_changed_values() -> None:
     )
 
     assert change.to_dict()["changed_fields"] == ["priority"]
+
+
+def test_audit_text_names_rule_task_and_field_changes() -> None:
+    task = Task("Client report", tags=["client"])
+    changes = audit_rules(
+        [task],
+        [Rule("prioritize", match_tag="client", set_priority="high")],
+        now=NOW,
+    )
+
+    output = format_audit_text(changes)
+
+    assert "prioritize" in output
+    assert task.id in output
+    assert "Client report" in output
+    assert "priority: 'medium' -> 'high'" in output
+
+
+def test_empty_audit_has_clear_message() -> None:
+    assert format_audit_text([]) == "No rule changes."
