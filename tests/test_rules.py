@@ -168,3 +168,14 @@ def test_preview_rules_reports_changes_without_mutating_tasks() -> None:
 
     assert planned == [("prioritize clients", task.id)]
     assert task.to_dict() == before
+
+
+def test_load_rules_rejects_duplicate_names_case_insensitively(tmp_path: Path) -> None:
+    path = tmp_path / "rules.json"
+    path.write_text(json.dumps([
+        {"name": "Urgent Work", "set_priority": "high"},
+        {"name": " urgent work ", "add_tags": ["focus"]},
+    ]), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="unique"):
+        load_rules(path)
