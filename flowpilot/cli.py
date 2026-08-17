@@ -1,4 +1,5 @@
 import argparse
+import json
 from datetime import date, datetime
 from pathlib import Path
 
@@ -75,6 +76,7 @@ def build_parser() -> argparse.ArgumentParser:
     rules.add_argument("--at", dest="current_time")
     rules.add_argument("--dry-run", action="store_true")
     rules.add_argument("--explain", action="store_true")
+    rules.add_argument("--json", action="store_true", dest="audit_json")
 
     validate_rules = commands.add_parser("validate-rules", help="Validate rules without task changes")
     validate_rules.add_argument("path", type=Path)
@@ -195,7 +197,10 @@ def main(argv: list[str] | None = None) -> int:
                 store.save(tasks)
             print(f"Applied {len(applied)} rule changes")
         if args.explain:
-            print(format_audit_text(audit))
+            if args.audit_json:
+                print(json.dumps([change.to_dict() for change in audit], indent=2))
+            else:
+                print(format_audit_text(audit))
     elif args.command == "validate-rules":
         rules = load_rules(args.path)
         print(f"Validated {len(rules)} rules")
