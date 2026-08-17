@@ -8,6 +8,7 @@ def test_apply_rules_parser_supports_dry_run_and_fixed_time() -> None:
         "apply-rules",
         "rules.json",
         "--dry-run",
+        "--explain",
         "--at",
         "2030-01-10T09:00:00+00:00",
     ])
@@ -15,6 +16,7 @@ def test_apply_rules_parser_supports_dry_run_and_fixed_time() -> None:
     assert args.command == "apply-rules"
     assert args.path == Path("rules.json")
     assert args.dry_run
+    assert args.explain
     assert args.current_time == "2030-01-10T09:00:00+00:00"
 
 
